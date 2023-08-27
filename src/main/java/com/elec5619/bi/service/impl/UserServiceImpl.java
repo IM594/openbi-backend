@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -105,38 +104,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 3. 记录用户的登录态
         request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, user);
         return this.getLoginUserVO(user);
-    }
-
-    @Override
-    public LoginUserVO userLoginByMpOpen(WxOAuth2UserInfo wxOAuth2UserInfo, HttpServletRequest request) {
-        String unionId = wxOAuth2UserInfo.getUnionId();
-        String mpOpenId = wxOAuth2UserInfo.getOpenid();
-        // 单机锁
-        synchronized (unionId.intern()) {
-            // 查询用户是否已存在
-            QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("unionId", unionId);
-            User user = this.getOne(queryWrapper);
-            // 被封号，禁止登录
-            if (user != null && UserRoleEnum.BAN.getValue().equals(user.getUserRole())) {
-                throw new BusinessException(ErrorCode.FORBIDDEN_ERROR, "该用户已被封，禁止登录");
-            }
-            // 用户不存在则创建
-            if (user == null) {
-                user = new User();
-                user.setUnionId(unionId);
-                user.setMpOpenId(mpOpenId);
-                user.setUserAvatar(wxOAuth2UserInfo.getHeadImgUrl());
-                user.setUserName(wxOAuth2UserInfo.getNickname());
-                boolean result = this.save(user);
-                if (!result) {
-                    throw new BusinessException(ErrorCode.SYSTEM_ERROR, "登录失败");
-                }
-            }
-            // 记录用户的登录态
-            request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, user);
-            return getLoginUserVO(user);
-        }
     }
 
     /**
@@ -249,8 +216,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
         }
         Long id = userQueryRequest.getId();
-        String unionId = userQueryRequest.getUnionId();
-        String mpOpenId = userQueryRequest.getMpOpenId();
         String userName = userQueryRequest.getUserName();
         String userProfile = userQueryRequest.getUserProfile();
         String userRole = userQueryRequest.getUserRole();
@@ -258,8 +223,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String sortOrder = userQueryRequest.getSortOrder();
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq(id != null, "id", id);
-        queryWrapper.eq(StringUtils.isNotBlank(unionId), "unionId", unionId);
-        queryWrapper.eq(StringUtils.isNotBlank(mpOpenId), "mpOpenId", mpOpenId);
         queryWrapper.eq(StringUtils.isNotBlank(userRole), "userRole", userRole);
         queryWrapper.like(StringUtils.isNotBlank(userProfile), "userProfile", userProfile);
         queryWrapper.like(StringUtils.isNotBlank(userName), "userName", userName);
