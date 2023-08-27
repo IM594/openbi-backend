@@ -3,9 +3,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.elec5619.bi.mapper.PostFavourMapper">
+<mapper namespace="com.elec5619.openbi.mapper.PostFavourMapper">
 
-    <resultMap id="BaseResultMap" type="com.elec5619.bi.model.entity.PostFavour">
+    <resultMap id="BaseResultMap" type="com.elec5619.openbi.model.entity.PostFavour">
         <id property="id" column="id" jdbcType="BIGINT"/>
         <result property="postId" column="postId" jdbcType="BIGINT"/>
         <result property="userId" column="userId" jdbcType="BIGINT"/>
