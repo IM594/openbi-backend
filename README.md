@@ -1,3 +1,24 @@
+# OpenBI
+
+OpenBI后端
+
+## 注意事项
+
+1）管理员用户名密码
+
+```
+用户名: admin
+密码: 123123123
+```
+
+2) 后端接口测试地址
+
+```
+https://localhost:8101/api/doc.html
+```
+
+## 初始模板使用
+
 ### MySQL 数据库
 
 1）修改 `application.yml` 的数据库配置：
