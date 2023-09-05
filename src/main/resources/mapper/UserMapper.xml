@@ -7,6 +7,7 @@
     <resultMap id="BaseResultMap" type="com.elec5619.bi.model.entity.User">
         <id property="id" column="id" jdbcType="BIGINT"/>
         <result property="userName" column="userName" jdbcType="VARCHAR"/>
+        <result property="userEmail" column="userEmail" jdbcType="VARCHAR"/>
         <result property="userAvatar" column="userAvatar" jdbcType="VARCHAR"/>
         <result property="userProfile" column="userProfile" jdbcType="VARCHAR"/>
         <result property="userRole" column="userRole" jdbcType="VARCHAR"/>
@@ -17,7 +18,7 @@
 
     <sql id="Base_Column_List">
         id,
-        userName,userAvatar,userProfile,
+        userName,userEmail,userAvatar,userProfile,
         userRole,createTime,updateTime,isDelete
     </sql>
 </mapper>

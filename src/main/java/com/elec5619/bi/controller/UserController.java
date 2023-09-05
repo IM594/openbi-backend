@@ -266,8 +266,12 @@ public class UserController {
     @PostMapping("/update/my")
     public BaseResponse<Boolean> updateMyUser(@RequestBody UserUpdateMyRequest userUpdateMyRequest,
                                               HttpServletRequest request) {
-        if (userUpdateMyRequest == null) {
+        if (userUpdateMyRequest == null) {//如果请求为空，抛出异常：请求参数错误
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        //如果邮箱格式不符合要求，抛出异常：邮箱格式错误
+        if (!userUpdateMyRequest.getUserEmail().matches("^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$")) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱格式错误");
         }
         User loginUser = userService.getLoginUser(request);
         User user = new User();
