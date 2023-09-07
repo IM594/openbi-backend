@@ -14,7 +14,7 @@ OpenBI后端
 2) 后端接口测试地址
 
 ```
-https://localhost:8101/api/doc.html
+http://localhost:8101/api/doc.html
 ```
 
 ## 初始模板使用
