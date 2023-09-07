@@ -14,7 +14,7 @@ OpenBI后端
 2) 后端接口测试地址
 
 ```
-https://localhost:8101/api/doc.html
+http://localhost:8101/api/doc.html
 ```
 
 ## 初始模板使用
@@ -34,7 +34,7 @@ spring:
 
 2）执行 `sql/create_table.sql` 中的数据库语句，自动创建库表
 
-3）启动项目，访问 `http://localhost:8101/api/doc.html` 打开接口文档，不需要写前端就能在线调试接口
+3）启动项目，访问 `localhost:8101/api/doc.html` 打开接口文档，不需要写前端就能在线调试接口
 
 ![](doc/swagger.png)
 
