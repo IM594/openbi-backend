@@ -8,27 +8,41 @@ import com.elec5619.bi.common.DeleteRequest;
 import com.elec5619.bi.common.ErrorCode;
 import com.elec5619.bi.common.ResultUtils;
 import com.elec5619.bi.constant.CommonConstant;
+import com.elec5619.bi.constant.FileConstant;
+import com.elec5619.bi.constant.PromptConstant;
 import com.elec5619.bi.constant.UserConstant;
 import com.elec5619.bi.exception.BusinessException;
 import com.elec5619.bi.exception.ThrowUtils;
-import com.elec5619.bi.model.dto.chart.ChartAddRequest;
-import com.elec5619.bi.model.dto.chart.ChartEditRequest;
-import com.elec5619.bi.model.dto.chart.ChartQueryRequest;
-import com.elec5619.bi.model.dto.chart.ChartUpdateRequest;
+import com.elec5619.bi.model.dto.chart.*;
+import com.elec5619.bi.model.dto.file.UploadFileRequest;
 import com.elec5619.bi.model.entity.Chart;
 import com.elec5619.bi.model.entity.User;
+import com.elec5619.bi.model.enums.FileUploadBizEnum;
+import com.elec5619.bi.model.vo.ChartResponse;
 import com.elec5619.bi.service.ChartService;
+import com.elec5619.bi.service.OpenAiService;
 import com.elec5619.bi.service.UserService;
+import com.elec5619.bi.utils.ExcelUtils;
 import com.elec5619.bi.utils.SqlUtils;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;
+import net.bytebuddy.implementation.bytecode.Throw;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 帖子接口
@@ -45,6 +59,13 @@ public class ChartController {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private OpenAiService openAiService;
+
+    @Value("${openai.apiKey}")
+    private String apiKey;
+
 
     // private static final Gson GSON = new Gson();//Gson是Google提供的用来在Java对象和JSON数据之间进行映射的Java类库。
 
@@ -146,7 +167,7 @@ public class ChartController {
      */
     @PostMapping("/list/page")
     public BaseResponse<Page<Chart>> listChartByPage(@RequestBody ChartQueryRequest chartQueryRequest,
-                                                       HttpServletRequest request) {
+                                                     HttpServletRequest request) {
         long current = chartQueryRequest.getCurrent();
         long size = chartQueryRequest.getPageSize();
         // 限制爬虫
@@ -165,7 +186,7 @@ public class ChartController {
      */
     @PostMapping("/my/list/page")
     public BaseResponse<Page<Chart>> listMyChartByPage(@RequestBody ChartQueryRequest chartQueryRequest,
-                                                         HttpServletRequest request) {
+                                                       HttpServletRequest request) {
         if (chartQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -210,6 +231,237 @@ public class ChartController {
     }
 
     /**
+     * 智能分析（包括上传文件、分析、生成图表）
+     *
+     * @param multipartFile
+     * @param genChartByAiRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/gen")
+    public BaseResponse<ChartResponse> genChartByAi(@RequestPart("file") MultipartFile multipartFile,
+                                                    GenChartByAiRequest genChartByAiRequest, HttpServletRequest request) {
+
+        String name = genChartByAiRequest.getName();
+        String goal = genChartByAiRequest.getGoal();
+        String chartType = genChartByAiRequest.getChartType();
+        String apiKey = this.apiKey;
+        String prompt = null;
+
+        //校验登录
+        User loginUser = userService.getLoginUser(request);
+        ThrowUtils.throwIf(loginUser == null, ErrorCode.NO_AUTH_ERROR);
+
+        // TODO: 9/9/2023 如果分析目标为空，那就默认指定一个分析目标
+        //校验传入的参数（chartType、goal、name）
+        ThrowUtils.throwIf(StringUtils.isBlank(goal), ErrorCode.PARAMS_ERROR, "分析目标不能为空");
+        ThrowUtils.throwIf(StringUtils.isNotBlank(name) && name.length() > 100, ErrorCode.PARAMS_ERROR, "图表名称不能超过100个字符");
+
+        //初步校验文件后缀
+        //1. 获取上传的文件名
+        String originalFilename = multipartFile.getOriginalFilename();
+        ThrowUtils.throwIf(StringUtils.isBlank(originalFilename), ErrorCode.PARAMS_ERROR, "上传文件不能为空");
+        //2. 获取文件后缀
+        String suffix = originalFilename.substring(originalFilename.lastIndexOf(".") + 1);
+        //3. 校验文件后缀，只允许上传csv文件和excel文件
+        ThrowUtils.throwIf(!suffix.equals("csv") && !suffix.equals("xlsx") && !suffix.equals("xls"), ErrorCode.PARAMS_ERROR, "上传文件格式不正确");
+
+        //根据用户的输入，构造prompt
+        if (StringUtils.isBlank(chartType)) {
+            //如果用户没有输入图表类别，就使用默认的图表类别
+            prompt = PromptConstant.DEFAULT_PROMPT;
+        }//否则，检测用户输入的图表类型，并且选择对应prompt
+        else {
+            switch (chartType) {
+                case "line":
+                    prompt = PromptConstant.LINE_CHART_PROMPT;
+                    break;
+                case "bar":
+                    prompt = PromptConstant.BAR_CHART_PROMPT;
+                    break;
+                case "pie":
+                    prompt = PromptConstant.PIE_CHART_PROMPT;
+                    break;
+                case "scatter":
+                    prompt = PromptConstant.SCATTER_CHART_PROMPT;
+                    break;
+                default:
+                    prompt = PromptConstant.DEFAULT_PROMPT;
+                    break;
+            }
+        }
+
+        // TODO: 8/9/2023 图表类别应该在前端只给选项，不能让用户乱输入。
+        //构造用户输入
+        StringBuilder userInputs = new StringBuilder();
+        userInputs.append("Analyse goal: ").append(goal).append("\n");
+        //1. 如果用户选择了图表类别，就把图表类别拼接到用户输入里面
+        if (StringUtils.isNotBlank(chartType)) {
+            userInputs.append("Please use this chart type: ").append(chartType).append("\n");
+        }
+        //2. 如果用户输入了图表名称，就把图表名称拼接到用户输入里面
+        if (StringUtils.isNotBlank(name)) {
+            userInputs.append("Chart name: ").append(name).append("\n");
+        }
+
+        // TODO: 8/9/2023 格式处理，删掉null或者别的乱七八糟
+        //如果文件后缀是csv，就直接读取文件内容，如果是excel文件，就先转换成csv文件，再读取文件内容
+        String result;
+        if (suffix.equals("csv")) {
+            //读取文件内容
+            result = ExcelUtils.csvToString(multipartFile);
+        } else {
+            //读取用户上传的excel文件，进行处理，获得压缩后的数据（csv格式）
+            result = ExcelUtils.excelToCsv(multipartFile);
+        }
+
+        userInputs.append("Raw data: ").append(result).append("\n");
+
+
+        // 调用OpenAiService类里面的方法，获得代码和分析结论
+        List<Map<String, Object>> messages = openAiService.createMessages(prompt, userInputs.toString());
+        String response = openAiService.generateContent(apiKey, messages);
+
+        System.out.println(response);
+
+        //如果出现如下错误信息
+        //  "error": {
+        //    "message": "This model's maximum context length is 4097 tokens. However, you requested 5787 tokens (1691 in the messages, 4096 in the completion). Please reduce the length of the messages or completion.",
+        //    "type": "invalid_request_error",
+        //    "param": "messages",
+        //    "code": "context_length_exceeded"
+        //  }
+        //}
+        //说明用户输入的内容太长了，超过了4097个token，需要把用户输入的内容缩短一点
+        if (response.contains("context_length_exceeded")) {
+            //提取出当前请求的token数，返回给前端
+            int start = response.indexOf("However, you requested ");
+            int end = response.indexOf(" tokens (");
+            String tokenNum = response.substring(start + 23, end);
+            return ResultUtils.error(ErrorCode.PARAMS_ERROR, "请求的token数为：" + tokenNum + "，超过了4097个token，请缩短输入的内容");
+        }
+
+        // 提取content部分的内容，这样才能拿到生成的代码和分析结论
+        String content = getOpenAiResultContent(response);
+
+        // 提取生成的代码
+        String chartCode = processOpenAiResultToCode(content).trim();
+        System.out.println(chartCode);
+
+        //提取文字分析结果
+        String analysisResult = processOpenAiResultToAnalysisResult(content).trim();
+        System.out.println(analysisResult);
+
+        //保存图表到数据库
+        Chart chart = new Chart();
+        chart.setUserId(loginUser.getId());
+        chart.setName(name);
+        chart.setGoal(goal);
+        chart.setChartType(chartType);
+        chart.setGenChart(chartCode);
+        chart.setGenResult(analysisResult);
+        boolean saveResult = chartService.save(chart);
+        ThrowUtils.throwIf(!saveResult, ErrorCode.OPERATION_ERROR,"保存图表失败");
+
+        ChartResponse chartResponse = new ChartResponse();
+        chartResponse.setChartId(chart.getId());
+        chartResponse.setGenChart(chartCode);
+        chartResponse.setGenResult(analysisResult);
+
+        return ResultUtils.success(chartResponse);
+
+        //返回结果
+//        return ResultUtils.success(chartCode + "\n" + analysisResult);
+    }
+
+    /**
+     * 获取OpenAI的响应字符串中的content部分
+     *
+     * @param result
+     * @return
+     */
+    private String getOpenAiResultContent(String result) {
+        try {
+            // 将响应字符串解析为 JsonObject
+            JsonObject response = JsonParser.parseString(result).getAsJsonObject();
+
+            // 提取 choices 数组的第一个元素
+            JsonArray choices = response.getAsJsonArray("choices");
+            if (choices != null && choices.size() > 0) {
+                JsonObject choice = choices.get(0).getAsJsonObject();
+
+                // 提取 message 中的 content 字段
+                JsonObject message = choice.getAsJsonObject("message");
+                if (message != null) {
+                    String content = message.get("content").getAsString();
+                    return content;
+                }
+            }
+            // 如果无法提取有效的信息，返回空字符串或其他适当的默认值
+            return "";
+        } catch (Exception e) {
+            // 处理解析异常
+            e.printStackTrace();
+            return ""; // 返回空字符串或其他适当的默认值
+        }
+    }
+
+    /**
+     * 从响应中提取代码
+     *
+     * @param content OpenAI 的响应字符串
+     * @return 处理后的内容字符串
+     */
+    private String processOpenAiResultToCode(String content) {
+        try {
+            int start = content.indexOf("【【【【【");
+            int end = content.indexOf("】】】】】");
+            String code = content.substring(start + 5, end);
+
+            //如果code包含“option =”，则要提取"option ="后面的内容，一直到"};"
+            if (code.contains("option =")) {
+                int start1 = code.indexOf("option =");
+                int end1 = code.indexOf("};");
+                code = code.substring(start1 + 8, end1 + 1);
+            }
+            //如果包含"option="，则要提取"option="后面的内容，一直到"};"
+            else if (code.contains("option=")) {
+                int start1 = code.indexOf("option=");
+                int end1 = code.indexOf("};");
+                code = code.substring(start1 + 7, end1 + 1);
+            }
+            //如果包含 var option =
+            else if (code.contains("var option = ")) {
+                int start1 = code.indexOf("var option = ");
+                int end1 = code.indexOf("};");
+                code = code.substring(start1 + 13, end1 + 1);
+            }
+            //如果包含"option":，则只要{及以后的内容，一直到结尾
+            else if (code.contains("\"option\":")) {
+                int start1 = code.indexOf("{");
+                code = code.substring(start1);
+            }
+            //如果前面有无用的注释，就把注释一直到{之间的代码删掉
+            else if (code.contains("//")) {
+                int start1 = code.indexOf("//");
+                int end1 = code.indexOf("{");
+                code = code.substring(end1);
+            }
+
+            return code;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    private String processOpenAiResultToAnalysisResult(String content) {
+        int start = content.indexOf("】】】】】");
+        String analysisResult = content.substring(start + 5);
+        return analysisResult;
+    }
+
+    /**
      * 获取查询包装类
      *
      * @param chartQueryRequest
@@ -222,6 +474,7 @@ public class ChartController {
         }
 
         Long id = chartQueryRequest.getId();
+        String name = chartQueryRequest.getName();
         String goal = chartQueryRequest.getGoal();
         String chartType = chartQueryRequest.getChartType();
         Long userId = chartQueryRequest.getUserId();
@@ -230,7 +483,8 @@ public class ChartController {
 
         //queryWrapper.eq里面的参数是boolean类型，如果为true就会拼接到sql语句里面，如果为false就不会拼接到sql语句里面
         queryWrapper.eq(id != null && id > 0, "id", id);//如果存在id，就把id拼接到sql语句里面
-        queryWrapper.eq(ObjectUtils.isNotEmpty(userId),"id",userId);
+        queryWrapper.like(StringUtils.isNotBlank(name), "name", name);
+        queryWrapper.eq(ObjectUtils.isNotEmpty(userId), "id", userId);
         queryWrapper.eq(StringUtils.isNotBlank(goal), "goal", goal);
         queryWrapper.eq(StringUtils.isNotBlank(chartType), "chartType", chartType);
         queryWrapper.eq("isDelete", false);//查询的时候只查询isDelete为false的数据

@@ -1,6 +1,7 @@
 package com.elec5619.bi.model.dto.chart;
 
 import lombok.Data;
+
 import java.io.Serializable;
 
 /**
@@ -10,6 +11,11 @@ import java.io.Serializable;
  */
 @Data
 public class ChartAddRequest implements Serializable {
+
+    /**
+     * 图表名称
+     */
+    private String name;
 
     /**
      * 分析目标

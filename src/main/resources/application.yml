@@ -66,3 +66,6 @@ cos:
     secretKey: xxx
     region: xxx
     bucket: xxx
+# application.yml
+openai:
+  apiKey: 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
