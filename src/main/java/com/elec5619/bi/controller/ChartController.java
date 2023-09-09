@@ -8,30 +8,24 @@ import com.elec5619.bi.common.DeleteRequest;
 import com.elec5619.bi.common.ErrorCode;
 import com.elec5619.bi.common.ResultUtils;
 import com.elec5619.bi.constant.CommonConstant;
-import com.elec5619.bi.constant.FileConstant;
 import com.elec5619.bi.constant.PromptConstant;
 import com.elec5619.bi.constant.UserConstant;
 import com.elec5619.bi.exception.BusinessException;
 import com.elec5619.bi.exception.ThrowUtils;
 import com.elec5619.bi.model.dto.chart.*;
-import com.elec5619.bi.model.dto.file.UploadFileRequest;
 import com.elec5619.bi.model.entity.Chart;
 import com.elec5619.bi.model.entity.User;
-import com.elec5619.bi.model.enums.FileUploadBizEnum;
 import com.elec5619.bi.model.vo.ChartResponse;
 import com.elec5619.bi.service.ChartService;
 import com.elec5619.bi.service.OpenAiService;
 import com.elec5619.bi.service.UserService;
 import com.elec5619.bi.utils.ExcelUtils;
 import com.elec5619.bi.utils.SqlUtils;
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;
-import net.bytebuddy.implementation.bytecode.Throw;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,12 +34,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
 import java.util.List;
 import java.util.Map;
 
 /**
- * 帖子接口
+ * 图表接口
  *
  * @author Zhaohao Lu
  */
@@ -67,9 +60,7 @@ public class ChartController {
     private String apiKey;
 
 
-    // private static final Gson GSON = new Gson();//Gson是Google提供的用来在Java对象和JSON数据之间进行映射的Java类库。
-
-    // region 增删改查
+    // 增删改查
 
     /**
      * 创建
@@ -159,13 +150,13 @@ public class ChartController {
     }
 
     /**
-     * 分页获取列表（封装类
+     * 分页获取列表
      *
      * @param chartQueryRequest
      * @param request
      * @return
      */
-    @PostMapping("/list/page")
+    @PostMapping("/list/chart")
     public BaseResponse<Page<Chart>> listChartByPage(@RequestBody ChartQueryRequest chartQueryRequest,
                                                      HttpServletRequest request) {
         long current = chartQueryRequest.getCurrent();
@@ -184,7 +175,7 @@ public class ChartController {
      * @param request
      * @return
      */
-    @PostMapping("/my/list/page")
+    @PostMapping("/my/list/chart")
     public BaseResponse<Page<Chart>> listMyChartByPage(@RequestBody ChartQueryRequest chartQueryRequest,
                                                        HttpServletRequest request) {
         if (chartQueryRequest == null) {
@@ -201,7 +192,7 @@ public class ChartController {
         return ResultUtils.success(chartPage);
     }
 
-    // endregion
+    // 增删改查结束
 
     /**
      * 编辑（用户）
@@ -236,7 +227,8 @@ public class ChartController {
      * @param multipartFile
      * @param genChartByAiRequest
      * @param request
-     * @return
+     * @return 返回生成的图表代码和分析结论
+     * @Author Zhaohao Lu
      */
     @PostMapping("/gen")
     public BaseResponse<ChartResponse> genChartByAi(@RequestPart("file") MultipartFile multipartFile,
@@ -264,7 +256,7 @@ public class ChartController {
         //2. 获取文件后缀
         String suffix = originalFilename.substring(originalFilename.lastIndexOf(".") + 1);
         //3. 校验文件后缀，只允许上传csv文件和excel文件
-        ThrowUtils.throwIf(!suffix.equals("csv") && !suffix.equals("xlsx") && !suffix.equals("xls"), ErrorCode.PARAMS_ERROR, "上传文件格式不正确");
+        ThrowUtils.throwIf(!suffix.equals("csv") && !suffix.equals("xlsx") && !suffix.equals("xls"), ErrorCode.PARAMS_ERROR, "上传文件格式不符合要求");
 
         //根据用户的输入，构造prompt
         if (StringUtils.isBlank(chartType)) {
@@ -378,7 +370,8 @@ public class ChartController {
      * 获取OpenAI的响应字符串中的content部分
      *
      * @param result
-     * @return
+     * @return 提取到的content内容
+     * @Author Zhaohao Lu
      */
     private String getOpenAiResultContent(String result) {
         try {
@@ -410,7 +403,8 @@ public class ChartController {
      * 从响应中提取代码
      *
      * @param content OpenAI 的响应字符串
-     * @return 处理后的内容字符串
+     * @return 处理后的代码字符串
+     * @Author Zhaohao Lu
      */
     private String processOpenAiResultToCode(String content) {
         try {
@@ -455,6 +449,13 @@ public class ChartController {
         }
     }
 
+    /**
+     * 从响应中提取分析结论
+     * @param content
+     * @return 处理后的分析结论
+     *
+     * @Author Zhaohao Lu
+     */
     private String processOpenAiResultToAnalysisResult(String content) {
         int start = content.indexOf("】】】】】");
         String analysisResult = content.substring(start + 5);
@@ -465,7 +466,9 @@ public class ChartController {
      * 获取查询包装类
      *
      * @param chartQueryRequest
-     * @return
+     * @return  查询包装类
+     *
+     * @Author Zhaohao Lu
      */
     private QueryWrapper<Chart> getQueryWrapper(ChartQueryRequest chartQueryRequest) {
         QueryWrapper<Chart> queryWrapper = new QueryWrapper<>();

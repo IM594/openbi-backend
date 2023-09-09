@@ -6,25 +6,49 @@ package com.elec5619.bi.constant;
  * @Author Zhaohao Lu
  */
 public interface PromptConstant {
+
+    /**
+     * Prompt Part1
+     *
+     * @Author Zhaohao Lu
+     */
     String SHARED_INTRO = "You are a data analyst and front-end developer. Given the input format:\n" +
             "{Requirements or goals for data analysis},\n" +
             "{csv format raw data, separated by , },\n" +
             "generate the specified format in the following for a";
 
+    /**
+     * Prompt Part2 - for generating code
+     *
+     * @Author Zhaohao Lu
+     */
     String SHARED_CODESPACE = "【【【【【\n" +
             "{front-end Echarts V5 option configuration object js code, ensuring reasonable and beautiful data visualization and no redundant content. Add tooltip for the chart so that I can switch it. Please make the charts look clear at a glance. And learn the official echarts example how to make a beautiful";
 
+    /**
+     * Prompt Part3 - for generating conclusion
+     *
+     * @Author Zhaohao Lu
+     */
     String SHARED_CONCLUSION = "】】】】】\n" +
             "{Provide a clear and detailed conclusion of the data analysis, avoiding redundant comments}";
 
 
-
-
+    /**
+     * Default prompt
+     *
+     * @Author Zhaohao Lu
+     */
     String DEFAULT_PROMPT = SHARED_INTRO + " chart...\n" +
             SHARED_CODESPACE + " chart. " +
             "For example: {Your Chart Configuration Here}...\n" +
             SHARED_CONCLUSION;
 
+    /**
+     * Line chart prompt
+     *
+     * @Author Zhaohao Lu
+     */
     String LINE_CHART_PROMPT = SHARED_INTRO + " line chart...\n" +
             SHARED_CODESPACE + " line chart. " +
             "For example:\n" +
@@ -70,10 +94,20 @@ public interface PromptConstant {
             "}...\n" +
             SHARED_CONCLUSION;
 
+    /**
+     * Pie chart prompt
+     *
+     * @Author Zhaohao Lu
+     */
     String PIE_CHART_PROMPT = SHARED_INTRO + " pie chart...\n" +
             SHARED_CODESPACE + " pie chart. " +
             SHARED_CONCLUSION;
 
+    /**
+     * Scatter chart prompt
+     *
+     * @Author Zhaohao Lu
+     */
     String SCATTER_CHART_PROMPT = SHARED_INTRO + " scatter chart...\n" +
             SHARED_CODESPACE + " scatter chart. " +
             "For example:\n" +
