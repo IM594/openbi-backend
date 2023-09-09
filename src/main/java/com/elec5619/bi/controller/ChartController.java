@@ -18,6 +18,7 @@ import com.elec5619.bi.model.dto.file.UploadFileRequest;
 import com.elec5619.bi.model.entity.Chart;
 import com.elec5619.bi.model.entity.User;
 import com.elec5619.bi.model.enums.FileUploadBizEnum;
+import com.elec5619.bi.model.vo.ChartResponse;
 import com.elec5619.bi.service.ChartService;
 import com.elec5619.bi.service.OpenAiService;
 import com.elec5619.bi.service.UserService;
@@ -238,8 +239,8 @@ public class ChartController {
      * @return
      */
     @PostMapping("/gen")
-    public BaseResponse<String> genChartByAi(@RequestPart("file") MultipartFile multipartFile,
-                                             GenChartByAiRequest genChartByAiRequest, HttpServletRequest request) {
+    public BaseResponse<ChartResponse> genChartByAi(@RequestPart("file") MultipartFile multipartFile,
+                                                    GenChartByAiRequest genChartByAiRequest, HttpServletRequest request) {
 
         String name = genChartByAiRequest.getName();
         String goal = genChartByAiRequest.getGoal();
@@ -296,7 +297,7 @@ public class ChartController {
         userInputs.append("Analyse goal: ").append(goal).append("\n");
         //1. 如果用户选择了图表类别，就把图表类别拼接到用户输入里面
         if (StringUtils.isNotBlank(chartType)) {
-            userInputs.append("Chart type: ").append(chartType).append("\n");
+            userInputs.append("Please use this chart type: ").append(chartType).append("\n");
         }
         //2. 如果用户输入了图表名称，就把图表名称拼接到用户输入里面
         if (StringUtils.isNotBlank(name)) {
@@ -344,18 +345,33 @@ public class ChartController {
         String content = getOpenAiResultContent(response);
 
         // 提取生成的代码
-        String code = processOpenAiResultToCode(content);
-        System.out.println(code);
+        String chartCode = processOpenAiResultToCode(content).trim();
+        System.out.println(chartCode);
 
         //提取文字分析结果
-        String analysisResult = processOpenAiResultToAnalysisResult(content);
+        String analysisResult = processOpenAiResultToAnalysisResult(content).trim();
         System.out.println(analysisResult);
 
-        // todo 根据登录的用户，保存到数据库
+        //保存图表到数据库
+        Chart chart = new Chart();
+        chart.setUserId(loginUser.getId());
+        chart.setName(name);
+        chart.setGoal(goal);
+        chart.setChartType(chartType);
+        chart.setGenChart(chartCode);
+        chart.setGenResult(analysisResult);
+        boolean saveResult = chartService.save(chart);
+        ThrowUtils.throwIf(!saveResult, ErrorCode.OPERATION_ERROR,"保存图表失败");
 
+        ChartResponse chartResponse = new ChartResponse();
+        chartResponse.setChartId(chart.getId());
+        chartResponse.setGenChart(chartCode);
+        chartResponse.setGenResult(analysisResult);
+
+        return ResultUtils.success(chartResponse);
 
         //返回结果
-        return ResultUtils.success(code + "\n" + analysisResult);
+//        return ResultUtils.success(chartCode + "\n" + analysisResult);
     }
 
     /**
