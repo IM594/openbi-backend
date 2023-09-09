@@ -3,6 +3,8 @@ package com.elec5619.bi.service.impl;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.json.JSONUtil;
+import com.elec5619.bi.common.ErrorCode;
+import com.elec5619.bi.exception.BusinessException;
 import com.elec5619.bi.service.OpenAiService;
 import org.springframework.stereotype.Service;
 
@@ -14,8 +16,12 @@ import java.util.Map;
 @Service
 public class OpenAiServiceImpl implements OpenAiService {
 
+    //最大token数量，指的是生成的文本的长度
+    private static final int MAX_TOKENS = 2048;
+
     /**
-     * 实现生成内容的方法
+     * 实现 生成内容 的方法
+     *
      * @param apiKey
      * @param messages
      * @return
@@ -28,11 +34,13 @@ public class OpenAiServiceImpl implements OpenAiService {
         Map<String, Object> paramMap = createOpenAiRequest(messages);
         System.out.println(paramMap);
         String result = sendPostRequest(url, apiKey, paramMap);
+        //返回结果
         return result;
     }
 
     /**
-     * 实现创建消息的方法
+     * 实现 创建消息 的方法
+     *
      * @param prompt
      * @param userInput
      * @return
@@ -47,7 +55,8 @@ public class OpenAiServiceImpl implements OpenAiService {
     }
 
     /**
-     * 创建一个消息
+     * 创建 一个消息
+     *
      * @param role
      * @param content
      * @return
@@ -59,11 +68,17 @@ public class OpenAiServiceImpl implements OpenAiService {
         return message;
     }
 
+    /**
+     * 创建 OpenAI 请求参数
+     *
+     * @param messages
+     * @return
+     */
     private Map<String, Object> createOpenAiRequest(List<Map<String, Object>> messages) {
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("model", "gpt-3.5-turbo");
         paramMap.put("messages", messages);
-        paramMap.put("max_tokens", 2048);
+        paramMap.put("max_tokens", MAX_TOKENS);
         paramMap.put("temperature", 0.5);
         paramMap.put("top_p", 1);
         paramMap.put("n", 1);
@@ -72,14 +87,25 @@ public class OpenAiServiceImpl implements OpenAiService {
         return paramMap;
     }
 
+    /**
+     * 发送 POST 请求
+     *
+     * @param url
+     * @param apiKey
+     * @param paramMap
+     * @return
+     */
     private String sendPostRequest(String url, String apiKey, Map<String, Object> paramMap) {
         String json = JSONUtil.toJsonStr(paramMap);
-        HttpResponse response = HttpRequest.post(url)
-                .header("Content-Type", "application/json")
-                .header("Authorization", "Bearer " + apiKey)
-                .body(json)
-                .execute();
-
-        return response.body();
+        try {
+            HttpResponse response = HttpRequest.post(url)
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer " + apiKey)
+                    .body(json)
+                    .execute();
+            return response.body();
+        } catch (Exception e) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "OpenAI响应错误");
+        }
     }
 }

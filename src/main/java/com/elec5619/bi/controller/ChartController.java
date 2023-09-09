@@ -9,6 +9,7 @@ import com.elec5619.bi.common.ErrorCode;
 import com.elec5619.bi.common.ResultUtils;
 import com.elec5619.bi.constant.CommonConstant;
 import com.elec5619.bi.constant.FileConstant;
+import com.elec5619.bi.constant.PromptConstant;
 import com.elec5619.bi.constant.UserConstant;
 import com.elec5619.bi.exception.BusinessException;
 import com.elec5619.bi.exception.ThrowUtils;
@@ -244,87 +245,102 @@ public class ChartController {
         String goal = genChartByAiRequest.getGoal();
         String chartType = genChartByAiRequest.getChartType();
         String apiKey = this.apiKey;
+        String prompt = null;
 
         //校验登录
         User loginUser = userService.getLoginUser(request);
         ThrowUtils.throwIf(loginUser == null, ErrorCode.NO_AUTH_ERROR);
 
-        //校验传入的参数
+        // TODO: 9/9/2023 如果分析目标为空，那就默认指定一个分析目标
+        //校验传入的参数（chartType、goal、name）
         ThrowUtils.throwIf(StringUtils.isBlank(goal), ErrorCode.PARAMS_ERROR, "分析目标不能为空");
         ThrowUtils.throwIf(StringUtils.isNotBlank(name) && name.length() > 100, ErrorCode.PARAMS_ERROR, "图表名称不能超过100个字符");
 
-        // TODO: 8/9/2023 优化prompt，这样token太多了
-        //Prompt
-        String prompt = "You are a data analyst and front-end developer, next I will give you content in the following fixed format:\n" +
-                "Analysis Requirement:\n" +
-                "{Requirements or goals for data analysis}\n" +
-                "Raw Data:\n" +
-                "{csv format raw data, separated by , }\n" +
-                "Based on these two parts, please generate the content in the following specified format (in addition to not outputting any extra beginnings, endings, comments)\n" +
-                "【【【【【\n" +
-                "{front-end Echarts V5 option configuration object js code, reasonable data visualisation, do not generate any redundant content, such as comments. If i don't give you the chart type, please choose the best type for me to generate the Echarts.\n For example {\n" +
-                "  xAxis: {\n" +
-                "    type: 'category',\n" +
-                "    data: ['2023/5/1', '2023/5/2', '2023/5/3', '2023/5/4', '2023/5/5', '2023/5/6', '2023/5/7', '2023/5/8', '2023/5/9', '2023/5/10', '2023/5/11', '2023/5/12', '2023/5/13', '2023/5/14', '2023/5/15', '2023/5/16', '2023/5/17', '2023/5/18', '2023/5/19', '2023/5/20', '2023/5/21', '2023/5/22', '2023/5/23', '2023/5/24', '2023/5/25', '2023/5/26', '2023/5/27', '2023/5/28', '2023/5/29', '2023/5/30', '2023/5/31', '2023/6/1'],\n" +
-                "  },\n" +
-                "  yAxis: [\n" +
-                "    {\n" +
-                "      type: 'value',\n" +
-                "      name: '销售额（元）',\n" +
-                "      position: 'left',\n" +
-                "      min: 0,\n" +
-                "      max: 130000,\n" +
-                "    },\n" +
-                "    {\n" +
-                "      type: 'value',\n" +
-                "      name: '广告投入（元）',\n" +
-                "      position: 'right',\n" +
-                "      min: 0,\n" +
-                "      max: 16000,\n" +
-                "    },\n" +
-                "  ],\n" +
-                "  series: [\n" +
-                "    {\n" +
-                "      name: '销售额（元）',\n" +
-                "      type: 'line',\n" +
-                "      data: [120000, 98000, 78000, 92000, 105000, 88000, 104000, 123000, 97000, 116000, 98000, 82000, 103000, 92000, 118000, 107000, 96000, 110000, 89000, 104000, 119000, 93000, 101000, 85000, 112000, 99000, 107000, 116000, 91000, 106000, 120000, 98000],\n" +
-                "      yAxisIndex: 0,\n" +
-                "    },\n" +
-                "    {\n" +
-                "      name: '广告投入（元）',\n" +
-                "      type: 'line',\n" +
-                "      data: [15000, 10000, 8000, 11000, 13000, 9000, 12000, 15000, 10000, 14000, 10000, 8000, 12000, 9000, 14000, 12000, 10000, 13000, 8000, 12000, 14000, 9000, 11000, 8000, 13000, 10000, 12000, 14000, 9000, 12000, 15000, 10000],\n" +
-                "      yAxisIndex: 1,\n" +
-                "    },\n" +
-                "    {\n" +
-                "      name: '市场份额（%）',\n" +
-                "      type: 'bar',\n" +
-                "      barWidth: '50%',\n" +
-                "      data: [25, 21.2, 18.3, 22.1, 23.8, 19.4, 24.7, 27.9, 22.3, 26.8, 21.2, 18.6, 23.5, 21.2, 27.2, 24.8, 20.5, 25.3, 18.9, 23.7, 27.1, 20.4, 22.8, 18.4, 25.1, 22.5, 24.7, 26.6, 20.6, 24.3, 26.4, 21.3],\n" +
-                "    },\n" +
-                "  ],\n" +
-                "}" +
-                "}\n" +
-                "】】】】】\n" +
-                "{clear conclusion of data analysis, the more detailed the better, do not generate redundant comments}";
+        //初步校验文件后缀
+        //1. 获取上传的文件名
+        String originalFilename = multipartFile.getOriginalFilename();
+        ThrowUtils.throwIf(StringUtils.isBlank(originalFilename), ErrorCode.PARAMS_ERROR, "上传文件不能为空");
+        //2. 获取文件后缀
+        String suffix = originalFilename.substring(originalFilename.lastIndexOf(".") + 1);
+        //3. 校验文件后缀，只允许上传csv文件和excel文件
+        ThrowUtils.throwIf(!suffix.equals("csv") && !suffix.equals("xlsx") && !suffix.equals("xls"), ErrorCode.PARAMS_ERROR, "上传文件格式不正确");
 
-        // TODO: 8/9/2023 目前之拼接了goal，还需要拼接别的。
+        //根据用户的输入，构造prompt
+        if (StringUtils.isBlank(chartType)) {
+            //如果用户没有输入图表类别，就使用默认的图表类别
+            prompt = PromptConstant.DEFAULT_PROMPT;
+        }//否则，检测用户输入的图表类型，并且选择对应prompt
+        else {
+            switch (chartType) {
+                case "line":
+                    prompt = PromptConstant.LINE_CHART_PROMPT;
+                    break;
+                case "bar":
+                    prompt = PromptConstant.BAR_CHART_PROMPT;
+                    break;
+                case "pie":
+                    prompt = PromptConstant.PIE_CHART_PROMPT;
+                    break;
+                case "scatter":
+                    prompt = PromptConstant.SCATTER_CHART_PROMPT;
+                    break;
+                default:
+                    prompt = PromptConstant.DEFAULT_PROMPT;
+                    break;
+            }
+        }
+
+        // TODO: 8/9/2023 图表类别应该在前端只给选项，不能让用户乱输入。
         //构造用户输入
         StringBuilder userInputs = new StringBuilder();
         userInputs.append("Analyse goal: ").append(goal).append("\n");
+        //1. 如果用户选择了图表类别，就把图表类别拼接到用户输入里面
+        if (StringUtils.isNotBlank(chartType)) {
+            userInputs.append("Chart type: ").append(chartType).append("\n");
+        }
+        //2. 如果用户输入了图表名称，就把图表名称拼接到用户输入里面
+        if (StringUtils.isNotBlank(name)) {
+            userInputs.append("Chart name: ").append(name).append("\n");
+        }
 
         // TODO: 8/9/2023 格式处理，删掉null或者别的乱七八糟
-        //读取用户上传的excel文件，进行处理，获得压缩后的数据（csv格式）
-        String result = ExcelUtils.excelToCsv(multipartFile);
+        //如果文件后缀是csv，就直接读取文件内容，如果是excel文件，就先转换成csv文件，再读取文件内容
+        String result;
+        if (suffix.equals("csv")) {
+            //读取文件内容
+            result = ExcelUtils.csvToString(multipartFile);
+        } else {
+            //读取用户上传的excel文件，进行处理，获得压缩后的数据（csv格式）
+            result = ExcelUtils.excelToCsv(multipartFile);
+        }
+
         userInputs.append("Raw data: ").append(result).append("\n");
 
-        // 调用OpenAiService类里面的方法
+
+        // 调用OpenAiService类里面的方法，获得代码和分析结论
         List<Map<String, Object>> messages = openAiService.createMessages(prompt, userInputs.toString());
         String response = openAiService.generateContent(apiKey, messages);
 
         System.out.println(response);
 
-        //提取content部分的内容
+        //如果出现如下错误信息
+        //  "error": {
+        //    "message": "This model's maximum context length is 4097 tokens. However, you requested 5787 tokens (1691 in the messages, 4096 in the completion). Please reduce the length of the messages or completion.",
+        //    "type": "invalid_request_error",
+        //    "param": "messages",
+        //    "code": "context_length_exceeded"
+        //  }
+        //}
+        //说明用户输入的内容太长了，超过了4097个token，需要把用户输入的内容缩短一点
+        if (response.contains("context_length_exceeded")) {
+            //提取出当前请求的token数，返回给前端
+            int start = response.indexOf("However, you requested ");
+            int end = response.indexOf(" tokens (");
+            String tokenNum = response.substring(start + 23, end);
+            return ResultUtils.error(ErrorCode.PARAMS_ERROR, "请求的token数为：" + tokenNum + "，超过了4097个token，请缩短输入的内容");
+        }
+
+        // 提取content部分的内容，这样才能拿到生成的代码和分析结论
         String content = getOpenAiResultContent(response);
 
         // 提取生成的代码
@@ -338,13 +354,13 @@ public class ChartController {
         // todo 根据登录的用户，保存到数据库
 
 
-
         //返回结果
         return ResultUtils.success(code + "\n" + analysisResult);
     }
 
     /**
      * 获取OpenAI的响应字符串中的content部分
+     *
      * @param result
      * @return
      */
@@ -381,12 +397,46 @@ public class ChartController {
      * @return 处理后的内容字符串
      */
     private String processOpenAiResultToCode(String content) {
-        int start = content.indexOf("【【【【【");
-        int end = content.indexOf("】】】】】");
-        String code = content.substring(start + 5, end);
-        code = code.replaceAll("\\\\n", "\n");
-        code = code.replaceAll("\\\\\"", "\"");
-        return code;
+        try {
+            int start = content.indexOf("【【【【【");
+            int end = content.indexOf("】】】】】");
+            String code = content.substring(start + 5, end);
+
+            //如果code包含“option =”，则要提取"option ="后面的内容，一直到"};"
+            if (code.contains("option =")) {
+                int start1 = code.indexOf("option =");
+                int end1 = code.indexOf("};");
+                code = code.substring(start1 + 8, end1 + 1);
+            }
+            //如果包含"option="，则要提取"option="后面的内容，一直到"};"
+            else if (code.contains("option=")) {
+                int start1 = code.indexOf("option=");
+                int end1 = code.indexOf("};");
+                code = code.substring(start1 + 7, end1 + 1);
+            }
+            //如果包含 var option =
+            else if (code.contains("var option = ")) {
+                int start1 = code.indexOf("var option = ");
+                int end1 = code.indexOf("};");
+                code = code.substring(start1 + 13, end1 + 1);
+            }
+            //如果包含"option":，则只要{及以后的内容，一直到结尾
+            else if (code.contains("\"option\":")) {
+                int start1 = code.indexOf("{");
+                code = code.substring(start1);
+            }
+            //如果前面有无用的注释，就把注释一直到{之间的代码删掉
+            else if (code.contains("//")) {
+                int start1 = code.indexOf("//");
+                int end1 = code.indexOf("{");
+                code = code.substring(end1);
+            }
+
+            return code;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
     }
 
     private String processOpenAiResultToAnalysisResult(String content) {
