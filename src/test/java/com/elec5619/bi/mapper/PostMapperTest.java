@@ -2,6 +2,7 @@ package com.elec5619.bi.mapper;
 
 import com.elec5619.bi.model.entity.Post;
 
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 import javax.annotation.Resource;
@@ -24,5 +25,12 @@ class PostMapperTest {
     void listPostWithDelete() {
         List<Post> postList = postMapper.listPostWithDelete(new Date());
         Assertions.assertNotNull(postList);
+    }
+
+    @Test
+    void searchById(){
+        BigInteger bigInteger = new BigInteger("1696422752996564994");
+        Post post = postMapper.searchById(bigInteger);
+        System.out.println(post);
     }
 }

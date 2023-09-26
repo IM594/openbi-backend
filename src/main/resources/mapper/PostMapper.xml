@@ -29,4 +29,10 @@
         from post
         where updateTime >= #{minUpdateTime}
     </select>
+
+    <select id="searchById" resultType="com.elec5619.bi.model.entity.Post">
+        select *
+        from post
+        where id = #{id}
+    </select>
 </mapper>
