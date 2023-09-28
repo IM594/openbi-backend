@@ -2,6 +2,7 @@ package com.elec5619.bi.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.elec5619.bi.model.entity.Post;
+import org.springframework.stereotype.Repository;
 
 import java.math.BigInteger;
 import java.util.Date;

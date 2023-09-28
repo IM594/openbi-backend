@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.elec5619.bi.exception.BusinessException;
 import com.elec5619.bi.common.ErrorCode;
 import com.elec5619.bi.mapper.PostThumbMapper;
+import com.elec5619.bi.mapper.UserMapper;
 import com.elec5619.bi.model.entity.Post;
 import com.elec5619.bi.model.entity.PostThumb;
 import com.elec5619.bi.model.entity.User;
@@ -12,6 +13,7 @@ import com.elec5619.bi.service.PostService;
 import com.elec5619.bi.service.PostThumbService;
 import javax.annotation.Resource;
 import org.springframework.aop.framework.AopContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +28,9 @@ public class PostThumbServiceImpl extends ServiceImpl<PostThumbMapper, PostThumb
 
     @Resource
     private PostService postService;
+
+    @Autowired
+    PostThumbMapper postThumbMapper;
 
     /**
      * 点赞
@@ -94,6 +99,16 @@ public class PostThumbServiceImpl extends ServiceImpl<PostThumbMapper, PostThumb
             } else {
                 throw new BusinessException(ErrorCode.SYSTEM_ERROR);
             }
+        }
+    }
+
+    @Override
+    public int searchThumb(long postId, long userId) {
+        PostThumb postThumb = postThumbMapper.searchThumb(postId, userId);
+        if (postThumb != null){
+            return 1;
+        }else {
+            return 0;
         }
     }
 

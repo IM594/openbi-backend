@@ -17,13 +17,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 /**
  * 帖子点赞接口
  *
  * @author Zhaohao Lu
  */
 @RestController
-@RequestMapping("/post_thumb")
 @Slf4j
 public class PostThumbController {
 
@@ -40,7 +41,7 @@ public class PostThumbController {
      * @param request
      * @return resultNum 本次点赞变化数
      */
-    @PostMapping("/")
+    @PostMapping("/post_thumb")
     public BaseResponse<Integer> doThumb(@RequestBody PostThumbAddRequest postThumbAddRequest,
                                          HttpServletRequest request) {
         if (postThumbAddRequest == null || postThumbAddRequest.getPostId() <= 0) {
@@ -51,6 +52,19 @@ public class PostThumbController {
         long postId = postThumbAddRequest.getPostId();
         int result = postThumbService.doPostThumb(postId, loginUser);
         return ResultUtils.success(result);
+    }
+
+    @PostMapping("/search_thumb")
+    public BaseResponse<Integer> searchThumb(@RequestBody Map<String, Object> json){
+        long postId = Long.parseLong((String) json.get("postId"));
+        long userId = Long.parseLong((String) json.get("userId"));
+        int result = postThumbService.searchThumb(postId, userId);
+        if (result == 1){
+            return ResultUtils.success(result);
+        }else {
+            return ResultUtils.error(ErrorCode.NOT_FOUND_ERROR);
+        }
+
     }
 
 }
