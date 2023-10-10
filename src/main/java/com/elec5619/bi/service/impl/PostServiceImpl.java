@@ -22,6 +22,11 @@ import com.elec5619.bi.model.vo.PostVO;
 import com.elec5619.bi.model.vo.UserVO;
 import com.elec5619.bi.service.PostService;
 import com.elec5619.bi.utils.SqlUtils;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +35,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.sql.DataSource;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -39,6 +46,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 import org.springframework.data.elasticsearch.core.SearchHit;
@@ -113,6 +121,7 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
         List<String> tagList = postQueryRequest.getTags();
         Long userId = postQueryRequest.getUserId();
         Long notId = postQueryRequest.getNotId();
+        Integer isReport = postQueryRequest.getIsReport();
         // 拼接查询条件
         if (StringUtils.isNotBlank(searchText)) {
             queryWrapper.like("title", searchText).or().like("content", searchText);
@@ -128,6 +137,7 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
         queryWrapper.eq(ObjectUtils.isNotEmpty(id), "id", id);
         queryWrapper.eq(ObjectUtils.isNotEmpty(userId), "userId", userId);
         queryWrapper.eq("isDelete", false);
+        queryWrapper.eq("isReport",false);
         queryWrapper.orderBy(SqlUtils.validSortField(sortField), sortOrder.equals(CommonConstant.SORT_ORDER_ASC),
                 sortField);
         return queryWrapper;
@@ -231,6 +241,12 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
         return page;
     }
 
+    /**
+     * 看当前登录用户是否点赞收藏指定id的帖子
+     * @param post
+     * @param request
+     * @return
+     */
     @Override
     public PostVO getPostVO(Post post, HttpServletRequest request) {
         PostVO postVO = PostVO.objToVo(post);
@@ -309,7 +325,36 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
         postVOPage.setRecords(postVOList);
         return postVOPage;
     }
+    @Resource
+    private PostMapper postMapper;
 
+    @Autowired
+    private DataSource dataSource; // 自动注入数据源
+
+    /**
+     * 获取帖子的点赞数
+     *
+     * @param postId 帖子的ID
+     * @return 帖子的点赞数
+     */
+    public int getLikesCount(long postId) {
+        int likesCount = 0;
+        try (Connection connection = dataSource.getConnection()) {
+            String sql = "SELECT thumbNum FROM post WHERE id = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setLong(1, postId);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        likesCount = resultSet.getInt("thumbNum");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            // 处理数据库异常
+        }
+        return likesCount;
+    }
 }
 
 

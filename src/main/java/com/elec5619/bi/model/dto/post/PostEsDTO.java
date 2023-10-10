@@ -80,6 +80,10 @@ public class PostEsDTO implements Serializable {
      * 是否删除
      */
     private Integer isDelete;
+    /**
+     * 是否举报
+     */
+    private Integer isReport;
 
     private static final long serialVersionUID = 1L;
 
