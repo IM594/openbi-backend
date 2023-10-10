@@ -3,7 +3,7 @@ package com.elec5619.bi.manager;
 import com.qcloud.cos.COSClient;
 import com.qcloud.cos.model.PutObjectRequest;
 import com.qcloud.cos.model.PutObjectResult;
-import com.elec5619.bi.config.CosClientConfig;
+import com.elec5619.bi.model.dto.post.config.CosClientConfig;
 import java.io.File;
 import javax.annotation.Resource;
 import org.springframework.stereotype.Component;
