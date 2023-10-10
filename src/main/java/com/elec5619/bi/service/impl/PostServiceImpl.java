@@ -91,6 +91,7 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
         }
     }
 
+    //查询用这个
     /**
      * 获取查询包装类
      *
@@ -201,7 +202,8 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
         PageRequest pageRequest = PageRequest.of((int) current, (int) pageSize);
         // 构造查询
         NativeSearchQuery searchQuery = new NativeSearchQueryBuilder().withQuery(boolQueryBuilder)
-                .withPageable(pageRequest).withSorts(sortBuilder).build();
+                .withPageable(pageRequest)
+                .withSorts(sortBuilder).build();
         SearchHits<PostEsDTO> searchHits = elasticsearchRestTemplate.search(searchQuery, PostEsDTO.class);
         Page<Post> page = new Page<>();
         page.setTotal(searchHits.getTotalHits());

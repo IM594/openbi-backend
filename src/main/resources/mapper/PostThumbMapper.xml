@@ -17,4 +17,11 @@
         id,postId,
         userId,createTime,updateTime
     </sql>
+
+    <select id="searchThumb" resultType="com.elec5619.bi.model.entity.PostThumb">
+        select *
+        from post_thumb
+        where postId = #{postId}
+        and userId = #{userId}
+    </select>
 </mapper>

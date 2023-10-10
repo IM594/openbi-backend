@@ -1,4 +1,4 @@
-package com.elec5619.bi.config;
+package com.elec5619.bi.model.dto.post.config;
 
 import com.qcloud.cos.COSClient;
 import com.qcloud.cos.ClientConfig;
