@@ -1,7 +1,8 @@
-package com.elec5619.bi.common;
+package com.elec5619.bi.model.dto.post;
+
+import lombok.Data;
 
 import java.io.Serializable;
-import lombok.Data;
 
 /**
  * 删除请求
@@ -9,7 +10,7 @@ import lombok.Data;
  * @author Zhaohao Lu
  */
 @Data
-public class DeleteRequest implements Serializable {
+public class PostReportRequest implements Serializable {
 
     /**
      * id
