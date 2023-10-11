@@ -4,16 +4,13 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.elec5619.bi.constant.UserConstant;
 import com.elec5619.bi.exception.BusinessException;
 import com.elec5619.bi.exception.ThrowUtils;
+import com.elec5619.bi.model.dto.post.*;
 import com.google.gson.Gson;
 import com.elec5619.bi.annotation.AuthCheck;
 import com.elec5619.bi.common.BaseResponse;
 import com.elec5619.bi.common.DeleteRequest;
 import com.elec5619.bi.common.ErrorCode;
 import com.elec5619.bi.common.ResultUtils;
-import com.elec5619.bi.model.dto.post.PostAddRequest;
-import com.elec5619.bi.model.dto.post.PostEditRequest;
-import com.elec5619.bi.model.dto.post.PostQueryRequest;
-import com.elec5619.bi.model.dto.post.PostUpdateRequest;
 import com.elec5619.bi.model.entity.Post;
 import com.elec5619.bi.model.entity.User;
 import com.elec5619.bi.model.vo.PostVO;
@@ -29,6 +26,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import java.util.*;
+import javax.mail.*;
+import javax.mail.internet.*;
 
 /**
  * 帖子接口
@@ -245,4 +245,23 @@ public class PostController {
         return ResultUtils.success(result);
     }
 
+    @PostMapping("/report")
+    public BaseResponse<Boolean> reportPost(@RequestBody PostReportRequest postReportRequest, HttpServletRequest request) {
+        if (postReportRequest == null || postReportRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User user = userService.getLoginUser(request);
+        long id = postReportRequest.getId();
+        // 判断是否存在
+        Post oldPost = postService.getById(id);
+        ThrowUtils.throwIf(oldPost == null, ErrorCode.NOT_FOUND_ERROR);
+        // todo 验证当前用户是否举报过
+        // 举报数+1
+        int reportCount = oldPost.getIsReport();
+        reportCount++;
+        oldPost.setIsReport(reportCount);
+        // 更新帖子
+        boolean result = postService.updateById(oldPost);
+        return ResultUtils.success(result);
+    }
 }
