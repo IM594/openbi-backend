@@ -61,5 +61,10 @@ public class PostQueryRequest extends PageRequest implements Serializable {
      */
     private Long favourUserId;
 
+    /**
+     * 是否举报
+     */
+    private Integer isReport;
+
     private static final long serialVersionUID = 1L;
 }

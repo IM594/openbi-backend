@@ -70,6 +70,12 @@ public class Post implements Serializable {
     @TableLogic
     private Integer isDelete;
 
+    /**
+     * 是否举报
+     */
+
+    private Integer isReport;
+
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 }

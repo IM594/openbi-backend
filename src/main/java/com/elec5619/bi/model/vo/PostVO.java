@@ -81,6 +81,11 @@ public class PostVO implements Serializable {
     private Boolean hasFavour;
 
     /**
+     * 是否举报
+     */
+    private Integer isReport;
+
+    /**
      * 包装类转对象
      *
      * @param postVO
