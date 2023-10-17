@@ -23,7 +23,7 @@ public interface PromptConstant {
      * @Author Zhaohao Lu
      */
     String SHARED_CODESPACE = "【【【【【\n" +
-            "{front-end Echarts V5 option configuration object js code, ensuring reasonable and beautiful data visualization and no redundant content. Add tooltip for the chart so that I can switch it. Please make the charts look clear at a glance. And learn the official echarts example how to make a beautiful";
+            "{front-end Echarts V5 option configuration object js code (must Wrap the attribute names and string values in double quotes in JSON data), ensuring reasonable and beautiful data visualization and no redundant content. Add tooltip for the chart so that I can switch it. Please make the charts look clear at a glance. And learn the official echarts example how to make a beautiful";
 
     /**
      * Prompt Part3 - for generating conclusion
@@ -53,46 +53,48 @@ public interface PromptConstant {
             SHARED_CODESPACE + " line chart. " +
             "For example:\n" +
             "{\n" +
-            "  xAxis: {\n" +
-            "    type: 'category',\n" +
-            "    data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']\n" +
+            "  \"xAxis\": {\n" +
+            "    \"type\": \"category\",\n" +
+            "    \"data\": [\"Mon\", \"Tue\", \"Wed\", \"Thu\", \"Fri\", \"Sat\", \"Sun\"]\n" +
             "  },\n" +
-            "  yAxis: {\n" +
-            "    type: 'value'\n" +
+            "  \"yAxis\": {\n" +
+            "    \"type\": \"value\"\n" +
             "  },\n" +
-            "  series: [\n" +
+            "  \"series\": [\n" +
             "    {\n" +
-            "      data: [820, 932, 901, 934, 1290, 1330, 1320],\n" +
-            "      type: 'line',\n" +
-            "      smooth: true\n" +
+            "      \"data\": [820, 932, 901, 934, 1290, 1330, 1320],\n" +
+            "      \"type\": \"line\",\n" +
+            "      \"smooth\": true\n" +
             "    }\n" +
             "  ]\n" +
             "}...\n" +
             SHARED_CONCLUSION;
 
+
     String BAR_CHART_PROMPT = SHARED_INTRO + " bar chart...\n" +
             SHARED_CODESPACE + " bar chart. " +
             "For example:\n" +
             "{\n" +
-            "  xAxis: {\n" +
-            "    type: 'category',\n" +
-            "    data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']\n" +
+            "  \"xAxis\": {\n" +
+            "    \"type\": \"category\",\n" +
+            "    \"data\": [\"Mon\", \"Tue\", \"Wed\", \"Thu\", \"Fri\", \"Sat\", \"Sun\"]\n" +
             "  },\n" +
-            "  yAxis: {\n" +
-            "    type: 'value'\n" +
+            "  \"yAxis\": {\n" +
+            "    \"type\": \"value\"\n" +
             "  },\n" +
-            "  series: [\n" +
+            "  \"series\": [\n" +
             "    {\n" +
-            "      data: [120, 200, 150, 80, 70, 110, 130],\n" +
-            "      type: 'bar',\n" +
-            "      showBackground: true,\n" +
-            "      backgroundStyle: {\n" +
-            "        color: 'rgba(180, 180, 180, 0.2)'\n" +
+            "      \"data\": [120, 200, 150, 80, 70, 110, 130],\n" +
+            "      \"type\": \"bar\",\n" +
+            "      \"showBackground\": true,\n" +
+            "      \"backgroundStyle\": {\n" +
+            "        \"color\": \"rgba(180, 180, 180, 0.2)\"\n" +
             "      }\n" +
             "    }\n" +
             "  ]\n" +
             "}...\n" +
             SHARED_CONCLUSION;
+
 
     /**
      * Pie chart prompt
@@ -101,7 +103,52 @@ public interface PromptConstant {
      */
     String PIE_CHART_PROMPT = SHARED_INTRO + " pie chart...\n" +
             SHARED_CODESPACE + " pie chart. " +
+            "For example:\n" +
+            "{\n" +
+            "  \"tooltip\": {\n" +
+            "    \"trigger\": \"item\"\n" +
+            "  },\n" +
+            "  \"legend\": {\n" +
+            "    \"top\": \"5%\",\n" +
+            "    \"left\": \"center\"\n" +
+            "  },\n" +
+            "  \"series\": [\n" +
+            "    {\n" +
+            "      \"name\": \"Access From\",\n" +
+            "      \"type\": \"pie\",\n" +
+            "      \"radius\": [\"40%\", \"70%\"],\n" +
+            "      \"avoidLabelOverlap\": false,\n" +
+            "      \"itemStyle\": {\n" +
+            "        \"borderRadius\": 10,\n" +
+            "        \"borderColor\": \"#fff\",\n" +
+            "        \"borderWidth\": 2\n" +
+            "      },\n" +
+            "      \"label\": {\n" +
+            "        \"show\": false,\n" +
+            "        \"position\": \"center\"\n" +
+            "      },\n" +
+            "      \"emphasis\": {\n" +
+            "        \"label\": {\n" +
+            "          \"show\": true,\n" +
+            "          \"fontSize\": 40,\n" +
+            "          \"fontWeight\": \"bold\"\n" +
+            "        }\n" +
+            "      },\n" +
+            "      \"labelLine\": {\n" +
+            "        \"show\": false\n" +
+            "      },\n" +
+            "      \"data\": [\n" +
+            "        { \"value\": 1048, \"name\": \"Search Engine\" },\n" +
+            "        { \"value\": 735, \"name\": \"Direct\" },\n" +
+            "        { \"value\": 580, \"name\": \"Email\" },\n" +
+            "        { \"value\": 484, \"name\": \"Union Ads\" },\n" +
+            "        { \"value\": 300, \"name\": \"Video Ads\" }\n" +
+            "      ]\n" +
+            "    }\n" +
+            "  ]\n" +
+            "}..." +
             SHARED_CONCLUSION;
+
 
     /**
      * Scatter chart prompt
@@ -112,12 +159,12 @@ public interface PromptConstant {
             SHARED_CODESPACE + " scatter chart. " +
             "For example:\n" +
             "{\n" +
-            "  xAxis: {},\n" +
-            "  yAxis: {},\n" +
-            "  series: [\n" +
+            "  \"xAxis\": {},\n" +
+            "  \"yAxis\": {},\n" +
+            "  \"series\": [\n" +
             "    {\n" +
-            "      symbolSize: 20,\n" +
-            "      data: [\n" +
+            "      \"symbolSize\": 20,\n" +
+            "      \"data\": [\n" +
             "        [1, 8],\n" +
             "        [8.07, 6.95],\n" +
             "        [13.0, 7.58],\n" +
@@ -141,9 +188,10 @@ public interface PromptConstant {
             "        [7.08, 5.82],\n" +
             "        [5.02, 5.68]\n" +
             "      ],\n" +
-            "      type: 'scatter'\n" +
+            "      \"type\": \"scatter\"\n" +
             "    }\n" +
             "  ]\n" +
             "}...\n" +
             SHARED_CONCLUSION;
+
 }
