@@ -140,11 +140,11 @@ public class ChartController {
     @GetMapping("/get")
     public BaseResponse<Chart> getChartById(long id, HttpServletRequest request) {
         if (id <= 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            return ResultUtils.error(ErrorCode.NOT_FOUND_ERROR);
         }
         Chart chart = chartService.getById(id);
         if (chart == null) {
-            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+            return ResultUtils.error(ErrorCode.NOT_FOUND_ERROR);
         }
         return ResultUtils.success(chart);
     }
