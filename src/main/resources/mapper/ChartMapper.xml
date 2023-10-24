@@ -25,4 +25,13 @@
         userId,createTime,updateTime,
         isDelete
     </sql>
+
+    <select id="getChartByUserId" resultType="com.elec5619.bi.model.entity.Chart">
+        select *
+        from chart
+        where userId = #{userId}
+        ORDER BY createTime DESC
+        LIMIT 5
+    </select>
+
 </mapper>
