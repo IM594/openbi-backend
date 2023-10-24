@@ -149,6 +149,18 @@ public class ChartController {
         return ResultUtils.success(chart);
     }
 
+    @GetMapping("/getByUserId")
+    public BaseResponse<List<Chart>> getChartByUserId(long id, HttpServletRequest request) {
+        if (id <= 0) {
+            return ResultUtils.error(ErrorCode.NOT_FOUND_ERROR);
+        }
+        List<Chart> chart = chartService.getChartByUserId(id);
+        if (chart == null) {
+            return ResultUtils.error(ErrorCode.NOT_FOUND_ERROR);
+        }
+        return ResultUtils.success(chart);
+    }
+
     /**
      * 分页获取列表
      *
