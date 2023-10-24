@@ -12,6 +12,7 @@ import com.elec5619.bi.exception.ThrowUtils;
 import com.elec5619.bi.model.entity.User;
 import com.elec5619.bi.model.vo.LoginUserVO;
 import com.elec5619.bi.model.vo.UserVO;
+import com.elec5619.bi.service.EmailNotificationService;
 import com.elec5619.bi.service.UserService;
 import com.elec5619.bi.model.dto.user.UserAddRequest;
 import com.elec5619.bi.model.dto.user.UserLoginRequest;
@@ -22,6 +23,7 @@ import com.elec5619.bi.model.dto.user.UserUpdateRequest;
 
 import java.util.List;
 import javax.annotation.Resource;
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 
 import lombok.extern.slf4j.Slf4j;
@@ -333,4 +335,5 @@ public class UserController {
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(true);
     }
+
 }

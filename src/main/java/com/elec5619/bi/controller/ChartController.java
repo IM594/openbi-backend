@@ -149,7 +149,7 @@ public class ChartController {
         return ResultUtils.success(chart);
     }
 
-    @GetMapping("/getByUserId")
+    @GetMapping("/getChartsByUserId")
     public BaseResponse<List<Chart>> getChartByUserId(long id, HttpServletRequest request) {
         if (id <= 0) {
             return ResultUtils.error(ErrorCode.NOT_FOUND_ERROR);
