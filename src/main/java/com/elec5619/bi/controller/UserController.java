@@ -298,6 +298,10 @@ public class UserController {
         if (user == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
+        // 如果是admin，不允许禁用
+        if (UserConstant.ADMIN_ROLE.equals(user.getUserRole())) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "Cannot ban admin");
+        }
         user.setUserRole(UserConstant.BAN_ROLE);
         boolean result = userService.updateById(user);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
