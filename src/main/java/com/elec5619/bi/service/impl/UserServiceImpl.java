@@ -225,6 +225,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
+    public List<User> getAdminEmail() {
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("userRole", "admin");
+        List<User> adminList = this.baseMapper.selectList(queryWrapper);
+        // 遍历获取邮箱
+        for (User admin : adminList) {
+            String adminEmail = admin.getUserEmail();
+        }
+        return adminList;
+    }
+
+    @Override
     public QueryWrapper<User> getQueryWrapper(UserQueryRequest userQueryRequest) {
         if (userQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
