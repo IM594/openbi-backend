@@ -307,4 +307,30 @@ public class UserController {
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(true);
     }
+
+    /**
+     * 管理员恢复被ban的账户
+     * @param unbanRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/unban")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<Boolean> unbanUser(@RequestBody DeleteRequest unbanRequest, HttpServletRequest request) {
+        if (unbanRequest == null || unbanRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User user = userService.getById(unbanRequest.getId());
+        if (user == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        // 不允许把admin恢复为普通用户
+        if (UserConstant.ADMIN_ROLE.equals(user.getUserRole())) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "Cannot modify admin");
+        }
+        user.setUserRole(UserConstant.DEFAULT_ROLE);
+        boolean result = userService.updateById(user);
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        return ResultUtils.success(true);
+    }
 }
