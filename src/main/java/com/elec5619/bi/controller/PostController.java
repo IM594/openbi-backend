@@ -1,5 +1,6 @@
 package com.elec5619.bi.controller;
 
+import co.elastic.clients.elasticsearch.xpack.usage.Base;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.elec5619.bi.constant.UserConstant;
 import com.elec5619.bi.exception.BusinessException;
@@ -195,22 +196,27 @@ public class PostController {
 
     // endregion
 
-    /**
-     * 分页搜索（从 ES 查询，封装类）
-     *
-     * @param postQueryRequest
-     * @param request
-     * @return
-     */
-    @PostMapping("/search/page/vo")
-    public BaseResponse<Page<PostVO>> searchPostVOByPage(@RequestBody PostQueryRequest postQueryRequest,
-            HttpServletRequest request) {
-        long size = postQueryRequest.getPageSize();
-        // 限制爬虫
-        ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
-        Page<Post> postPage = postService.searchFromEs(postQueryRequest);
-        return ResultUtils.success(postService.getPostVOPage(postPage, request));
-    }
+
+
+//    /**
+//     * 分页搜索帖子，不从es
+//     * @param postQueryRequest
+//     * @param request
+//     * @return
+//     */
+//    @PostMapping("/search/page/vo")
+//    public BaseResponse<Page<PostVO>> searchPostVOByPage(@RequestBody PostQueryRequest postQueryRequest,
+//                                                         HttpServletRequest request) {
+//        long current = postQueryRequest.getCurrent();
+//        long size = postQueryRequest.getPageSize();
+//        String keyword = postQueryRequest.getKeyword();
+//        // 限制爬虫
+//        ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
+//        Page<Post> postPage = postService.searchPostByPage(new Page<>(current, size),
+//                postService.getQueryWrapper(postQueryRequest), keyword);
+//        return ResultUtils.success(postService.getPostVOPage(postPage, request));
+//    }
+
 
     /**
      * 编辑（用户）

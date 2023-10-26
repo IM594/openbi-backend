@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 /**
  * 帖子收藏接口
  *
@@ -105,4 +107,25 @@ public class PostFavourController {
                 postService.getQueryWrapper(postFavourQueryRequest.getPostQueryRequest()), userId);
         return ResultUtils.success(postService.getPostVOPage(postPage, request));
     }
+
+    /**
+     * 获取我是否收藏了指定帖子
+     * @param postFavourAddRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/searchFavour")
+    public BaseResponse<Integer> searchFavour(@RequestBody PostFavourAddRequest postFavourAddRequest,
+                                          HttpServletRequest request) {
+        if (postFavourAddRequest == null || postFavourAddRequest.getPostId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        // 登录才能点赞
+        final User loginUser = userService.getLoginUser(request);
+        long postId = postFavourAddRequest.getPostId();
+        int result = postFavourService.searchFavour(postId, loginUser.getId());
+        return ResultUtils.success(result);
+    }
+
 }
+

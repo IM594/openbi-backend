@@ -36,4 +36,34 @@
         from post
         where id = #{id}
     </select>
+
+    <select id="searchByKeyword" resultType="com.elec5619.bi.model.entity.Post">
+        select *
+        from post
+        where title like CONCAT('%',#{keyword},'%')
+        or content like CONCAT('%',#{keyword},'%')
+        or tags like CONCAT('%',#{keyword},'%')
+    </select>
+
+    <select id="searchByUserId" resultType="com.elec5619.bi.model.entity.Post">
+        select *
+        from post
+        where userId = #{userId}
+    </select>
+
+    <select id="searchByTag" resultType="com.elec5619.bi.model.entity.Post">
+        select *
+        from post
+        where tags like CONCAT('%',#{tag},'%')
+    </select>
+
+
+    <select id="searchPostByPage" resultType="com.elec5619.bi.model.entity.Post">
+        select *
+        from post
+        where title like CONCAT('%',#{keyword},'%')
+        or content like CONCAT('%',#{keyword},'%')
+        or tags like CONCAT('%',#{keyword},'%')
+        limit #{offset},#{limit}
+    </select>
 </mapper>

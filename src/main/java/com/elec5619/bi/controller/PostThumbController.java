@@ -37,7 +37,7 @@ public class PostThumbController {
 
     @Resource
     private PostService postService;
-  
+
     @Resource
     private UserService userService;
 
@@ -73,20 +73,27 @@ public class PostThumbController {
 
         return ResultUtils.success(result);
     }
-  
-    @PostMapping("/search_thumb")
-    public BaseResponse<Integer> searchThumb(@RequestBody Map<String, Object> json){
-        long postId = Long.parseLong((String) json.get("postId"));
-        long userId = Long.parseLong((String) json.get("userId"));
-        int result = postThumbService.searchThumb(postId, userId);
-        if (result == 1){
-            return ResultUtils.success(result);
-        }else {
-            return ResultUtils.error(ErrorCode.NOT_FOUND_ERROR);
-        }
 
+    /**
+     * 查询我是否点赞了某个帖子
+     * @param postThumbAddRequest
+     * @param request
+     * @return
+     * @throws MessagingException
+     */
+    @PostMapping("/search_thumb")
+    public BaseResponse<Integer> searchThumb(@RequestBody PostThumbAddRequest postThumbAddRequest,
+                                         HttpServletRequest request) throws MessagingException {
+        if (postThumbAddRequest == null || postThumbAddRequest.getPostId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        // 登录才能点赞
+        final User loginUser = userService.getLoginUser(request);
+        long postId = postThumbAddRequest.getPostId();
+        int result = postThumbService.searchThumb(postId, loginUser.getId());
+        return ResultUtils.success(result);
     }
-  
+
     private void sendEmailNotification(long postId, String email) throws MessagingException {
         // 构建邮件内容
         String subject = "Post Liked Notification";

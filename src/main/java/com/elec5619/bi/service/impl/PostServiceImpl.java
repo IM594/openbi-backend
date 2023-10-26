@@ -355,6 +355,23 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
         }
         return likesCount;
     }
+
+    /**
+     * 根据关键字分页搜索帖子，不用es查询。使用searchByKeyword
+     * @param objectPage
+     * @param queryWrapper
+     * @param keyword
+     * @return
+     */
+    public Page<Post> searchPostByPage(Page<Object> objectPage, QueryWrapper<Post> queryWrapper, String keyword){
+        Page<Post> postPage = new Page<>();
+        postPage.setCurrent(objectPage.getCurrent());
+        postPage.setSize(objectPage.getSize());
+        postPage.setTotal(objectPage.getTotal());
+        List<Post> postList = postMapper.searchPostByPage(objectPage, queryWrapper, keyword);
+        postPage.setRecords(postList);
+        return postPage;
+    }
 }
 
 
