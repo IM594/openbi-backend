@@ -31,7 +31,7 @@
         from chart
         where userId = #{userId}
         ORDER BY createTime DESC
-        LIMIT 5
+        LIMIT 6
     </select>
 
 </mapper>

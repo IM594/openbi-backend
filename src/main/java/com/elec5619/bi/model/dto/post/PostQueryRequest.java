@@ -67,4 +67,8 @@ public class PostQueryRequest extends PageRequest implements Serializable {
     private Integer isReport;
 
     private static final long serialVersionUID = 1L;
+
+    public String getKeyword() {
+        return searchText;
+    }
 }

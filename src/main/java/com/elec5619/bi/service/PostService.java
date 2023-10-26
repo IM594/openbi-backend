@@ -41,10 +41,11 @@ public interface PostService extends IService<Post> {
 
     /**
      * 获取帖子封装
-     * @description 看当前登录用户是否点赞收藏指定id的帖子
+     *
      * @param post
      * @param request
      * @return
+     * @description 看当前登录用户是否点赞收藏指定id的帖子
      */
     PostVO getPostVO(Post post, HttpServletRequest request);
 
@@ -56,5 +57,9 @@ public interface PostService extends IService<Post> {
      * @return
      */
     Page<PostVO> getPostVOPage(Page<Post> postPage, HttpServletRequest request);
+
     int getLikesCount(long postId);
+
+
+    Page<Post> searchPostByPage(Page<Object> objectPage, QueryWrapper<Post> queryWrapper, String keyword);
 }

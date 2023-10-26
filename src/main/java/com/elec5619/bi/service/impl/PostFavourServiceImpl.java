@@ -108,6 +108,26 @@ public class PostFavourServiceImpl extends ServiceImpl<PostFavourMapper, PostFav
         }
     }
 
+    /**
+     * 检查是否收藏
+     * @param postId
+     * @param userId
+     * @return
+     */
+    @Override
+    public int searchFavour(long postId, long userId) {
+        PostFavour postFavour = new PostFavour();
+        postFavour.setUserId(userId);
+        postFavour.setPostId(postId);
+        QueryWrapper<PostFavour> postFavourQueryWrapper = new QueryWrapper<>(postFavour);
+        PostFavour oldPostFavour = this.getOne(postFavourQueryWrapper);
+        if (oldPostFavour != null) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
 }
 
 

@@ -43,4 +43,7 @@ public interface PostFavourService extends IService<PostFavour> {
      * @return
      */
     int doPostFavourInner(long userId, long postId);
+
+    int searchFavour(long postId, long userId);
+
 }
