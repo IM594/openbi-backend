@@ -30,6 +30,7 @@
         select *
         from chart
         where userId = #{userId}
+        and isDelete != 1
         ORDER BY createTime DESC
         LIMIT 6
     </select>
