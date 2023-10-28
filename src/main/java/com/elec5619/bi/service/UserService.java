@@ -107,4 +107,10 @@ public interface UserService extends IService<User> {
      */
     QueryWrapper<User> getQueryWrapper(UserQueryRequest userQueryRequest);
 
+    /**
+     * 获取管理员邮箱
+     *
+     */
+    List<User> getAdminEmail();
+
 }

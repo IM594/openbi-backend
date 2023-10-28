@@ -12,6 +12,7 @@ import com.elec5619.bi.exception.ThrowUtils;
 import com.elec5619.bi.model.entity.User;
 import com.elec5619.bi.model.vo.LoginUserVO;
 import com.elec5619.bi.model.vo.UserVO;
+import com.elec5619.bi.service.EmailNotificationService;
 import com.elec5619.bi.service.UserService;
 import com.elec5619.bi.model.dto.user.UserAddRequest;
 import com.elec5619.bi.model.dto.user.UserLoginRequest;
@@ -22,6 +23,7 @@ import com.elec5619.bi.model.dto.user.UserUpdateRequest;
 
 import java.util.List;
 import javax.annotation.Resource;
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 
 import lombok.extern.slf4j.Slf4j;
@@ -298,9 +300,40 @@ public class UserController {
         if (user == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
+        // 如果是admin，不允许禁用
+        if (UserConstant.ADMIN_ROLE.equals(user.getUserRole())) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "Cannot ban admin");
+        }
         user.setUserRole(UserConstant.BAN_ROLE);
         boolean result = userService.updateById(user);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(true);
     }
+
+    /**
+     * 管理员恢复被ban的账户
+     * @param unbanRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/unban")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<Boolean> unbanUser(@RequestBody DeleteRequest unbanRequest, HttpServletRequest request) {
+        if (unbanRequest == null || unbanRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User user = userService.getById(unbanRequest.getId());
+        if (user == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        // 不允许把admin恢复为普通用户
+        if (UserConstant.ADMIN_ROLE.equals(user.getUserRole())) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "Cannot modify admin");
+        }
+        user.setUserRole(UserConstant.DEFAULT_ROLE);
+        boolean result = userService.updateById(user);
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        return ResultUtils.success(true);
+    }
+
 }

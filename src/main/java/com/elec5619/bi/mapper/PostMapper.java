@@ -1,6 +1,8 @@
 package com.elec5619.bi.mapper;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.elec5619.bi.model.entity.Post;
 import org.springframework.stereotype.Repository;
 
@@ -22,6 +24,7 @@ public interface PostMapper extends BaseMapper<Post> {
 
     Post searchById(BigInteger id);
 
+    List<Post> searchPostByPage(Page<Object> objectPage, QueryWrapper<Post> queryWrapper, String keyword);
 }
 
 
