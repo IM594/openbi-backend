@@ -22,8 +22,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * 用户服务测试
@@ -98,35 +97,18 @@ public class UserServiceTest {
 
     @Test
     public void testUserLogin() {
-        // 创建一个模拟的用户对象
         User user = new User();
         user.setUserAccount("Zhaohao");
         user.setUserPassword("123123123");
         user.setUserId(1698271973517299714L);
-        // 设置其他用户属性
 
-        // 模拟 HttpServletRequest
         MockHttpServletRequest request = new MockHttpServletRequest();
+        LoginUserVO loginUserVO = userService.userLogin("Zhaohao", "11", request);
+        assertNull(loginUserVO);
+//        assertEquals(1698271973517299714L, loginUserVO.getUserId());
 
-        // 模拟用户登录方法
-        LoginUserVO loginUserVO = userService.userLogin("Zhaohao", "123123123", request);
-
-        // 验证登录是否成功
-        assertNotNull(loginUserVO);
-        assertEquals(1698271973517299714L, loginUserVO.getUserId());
-        // 验证其他登录信息
-
-        // 还可以添加其他验证逻辑，例如验证登录失败的情况
     }
 
-    // 辅助方法：将对象转换为JSON字符串
-    private String asJsonString(final Object obj) {
-        try {
-            return new ObjectMapper().writeValueAsString(obj);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 
 
 }

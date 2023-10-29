@@ -1,6 +1,5 @@
 package com.elec5619.bi.controller;
 
-import co.elastic.clients.elasticsearch.xpack.usage.Base;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.elec5619.bi.constant.UserConstant;
 import com.elec5619.bi.exception.BusinessException;
