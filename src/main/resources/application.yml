@@ -11,8 +11,6 @@ spring:
       matching-strategy: ant_path_matcher
   # session 配置
   session:
-    # todo 取消注释开启分布式 session（须先配置 Redis）
-    # store-type: redis
     # 30 天过期
     timeout: 2592000
   # 数据库配置
@@ -21,20 +19,6 @@ spring:
     url: jdbc:mysql://openbi-elec5619-openbi.aivencloud.com:24356/bi
     username: avnadmin
     password: AVNS_RzaLxV8hMbvEkpAXNPJ
-  # Redis 配置
-  # todo 需替换配置，然后取消注释
-#  redis:
-#    database: 1
-#    host: localhost
-#    port: 6379
-#    timeout: 5000
-#    password: 123456
-  # Elasticsearch 配置
-  # todo 需替换配置，然后取消注释
-#  elasticsearch:
-#    uris: http://localhost:9200
-#    username: root
-#    password: 123456
   # 文件上传
   servlet:
     multipart:
@@ -58,14 +42,6 @@ mybatis-plus:
       logic-delete-field: isDelete # 全局逻辑删除的实体字段名
       logic-delete-value: 1 # 逻辑已删除值（默认为 1）
       logic-not-delete-value: 0 # 逻辑未删除值（默认为 0）
-# 对象存储
-# todo 需替换配置
-cos:
-  client:
-    accessKey: xxx
-    secretKey: xxx
-    region: xxx
-    bucket: xxx
 # application.yml
 openai:
   apiKey: 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
