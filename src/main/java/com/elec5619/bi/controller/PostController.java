@@ -6,6 +6,7 @@ import com.elec5619.bi.constant.UserConstant;
 import com.elec5619.bi.exception.BusinessException;
 import com.elec5619.bi.exception.ThrowUtils;
 import com.elec5619.bi.model.dto.post.*;
+import com.elec5619.bi.service.EmailNotificationService;
 import com.google.gson.Gson;
 import com.elec5619.bi.annotation.AuthCheck;
 import com.elec5619.bi.common.BaseResponse;
@@ -22,6 +23,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -49,6 +51,8 @@ public class PostController {
 
     private final static Gson GSON = new Gson();
 
+    @Autowired
+    private EmailNotificationService emailNotificationService; // 注入邮件通知服务
     // region 增删改查
 
     /**
@@ -231,7 +235,7 @@ public class PostController {
     }
 
     @PostMapping("/report")
-    public BaseResponse<Boolean> reportPost(@RequestBody PostReportRequest postReportRequest, HttpServletRequest request) {
+    public BaseResponse<Boolean> reportPost(@RequestBody PostReportRequest postReportRequest, HttpServletRequest request) throws MessagingException {
         if (postReportRequest == null || postReportRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -245,8 +249,23 @@ public class PostController {
         int reportCount = oldPost.getIsReport();
         reportCount++;
         oldPost.setIsReport(reportCount);
+        // 检查举报数是否达到阈值
+        if (reportCount == 5) {
+            // 达到阈值，触发邮件通知
+            // 获取当前用户的邮箱
+            String recipientEmail = user.getUserEmail();
+            sendEmailNotification(id, recipientEmail);
+        }
         // 更新帖子
         boolean result = postService.updateById(oldPost);
         return ResultUtils.success(result);
+    }
+    private void sendEmailNotification(long postId, String email) throws MessagingException {
+        // 构建邮件内容
+        String subject = "Post Reported Notification";
+        String content = "The post with ID " + postId + " has reported 5 times.";
+
+        // 发送邮件通知
+        emailNotificationService.sendNotificationEmail(email, subject, content);
     }
 }

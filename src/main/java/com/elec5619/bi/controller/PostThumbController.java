@@ -65,7 +65,7 @@ public class PostThumbController {
         String recipientEmail = loginUser.getUserEmail();
         // 检查点赞数是否达到阈值
         int likesCount = postService.getLikesCount(postId);
-        if (likesCount >= 5) {
+        if (likesCount == 5) {
             // 达到阈值，触发邮件通知
             sendEmailNotification(postId, recipientEmail);
         }
@@ -97,7 +97,7 @@ public class PostThumbController {
     private void sendEmailNotification(long postId, String email) throws MessagingException {
         // 构建邮件内容
         String subject = "Post Liked Notification";
-        String content = "The post with ID " + postId + " has received 5 or more likes.";
+        String content = "The post with ID " + postId + " has received 5 likes.";
 
         // 发送邮件通知
         emailNotificationService.sendNotificationEmail(email, subject, content);
