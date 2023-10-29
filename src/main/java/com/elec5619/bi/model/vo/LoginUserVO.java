@@ -54,4 +54,20 @@ public class LoginUserVO implements Serializable {
     private Date updateTime;
 
     private static final long serialVersionUID = 1L;
+
+    public void setUsername(String yourUsername) {
+    }
+
+    public void setUserRole(String user) {
+    }
+
+    public void setUserId(long l) {
+    }
+
+    public void setUserName(String lzh) {
+    }
+
+    public long getUserId() {
+        return id;
+    }
 }
