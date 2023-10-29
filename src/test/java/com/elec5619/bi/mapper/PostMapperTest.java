@@ -29,7 +29,7 @@ class PostMapperTest {
 
     @Test
     void searchById(){
-        BigInteger bigInteger = new BigInteger("1696422752996564994");
+        BigInteger bigInteger = new BigInteger("1718574207740231682");
         Post post = postMapper.searchById(bigInteger);
         System.out.println(post);
     }

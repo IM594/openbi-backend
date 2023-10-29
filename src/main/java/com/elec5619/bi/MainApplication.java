@@ -12,7 +12,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  *
  * @author Zhaohao Lu
  */
-// todo 如需开启 Redis，须移除 exclude 中的内容
 @SpringBootApplication(exclude = {RedisAutoConfiguration.class})
 @MapperScan("com.elec5619.bi.mapper")
 @EnableScheduling

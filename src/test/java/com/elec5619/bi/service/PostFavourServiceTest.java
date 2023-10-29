@@ -31,7 +31,7 @@ class PostFavourServiceTest {
 
     @Test
     void doPostFavour() {
-        int i = postFavourService.doPostFavour(1L, loginUser);
+        int i = postFavourService.doPostFavour(1718574207740231682L, loginUser);
         Assertions.assertTrue(i >= 0);
     }
 

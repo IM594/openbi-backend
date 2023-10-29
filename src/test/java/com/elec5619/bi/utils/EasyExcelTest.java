@@ -21,7 +21,7 @@ public class EasyExcelTest {
 
     @Test
     public void doImport() throws FileNotFoundException {
-        File file = ResourceUtils.getFile("classpath:test_excel.xlsx");
+        File file = ResourceUtils.getFile("classpath:games.xlsx");
         List<Map<Integer, String>> list = EasyExcel.read(file)
                 .excelType(ExcelTypeEnum.XLSX)
                 .sheet()
