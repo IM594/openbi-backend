@@ -9,31 +9,19 @@ import com.elec5619.bi.common.ResultUtils;
 import com.elec5619.bi.constant.UserConstant;
 import com.elec5619.bi.exception.BusinessException;
 import com.elec5619.bi.exception.ThrowUtils;
+import com.elec5619.bi.model.dto.user.*;
 import com.elec5619.bi.model.entity.User;
 import com.elec5619.bi.model.vo.LoginUserVO;
 import com.elec5619.bi.model.vo.UserVO;
-import com.elec5619.bi.service.EmailNotificationService;
 import com.elec5619.bi.service.UserService;
-import com.elec5619.bi.model.dto.user.UserAddRequest;
-import com.elec5619.bi.model.dto.user.UserLoginRequest;
-import com.elec5619.bi.model.dto.user.UserQueryRequest;
-import com.elec5619.bi.model.dto.user.UserRegisterRequest;
-import com.elec5619.bi.model.dto.user.UserUpdateMyRequest;
-import com.elec5619.bi.model.dto.user.UserUpdateRequest;
-
-import java.util.List;
-import javax.annotation.Resource;
-import javax.mail.MessagingException;
-import javax.servlet.http.HttpServletRequest;
-
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * 用户接口

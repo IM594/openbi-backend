@@ -10,18 +10,15 @@ import com.elec5619.bi.service.EmailNotificationService;
 import com.elec5619.bi.service.PostService;
 import com.elec5619.bi.service.PostThumbService;
 import com.elec5619.bi.service.UserService;
-
-import javax.annotation.Resource;
-import javax.mail.MessagingException;
-import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
+import javax.annotation.Resource;
+import javax.mail.MessagingException;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * 帖子点赞接口

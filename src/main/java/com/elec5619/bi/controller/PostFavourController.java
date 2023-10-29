@@ -1,11 +1,11 @@
 package com.elec5619.bi.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.elec5619.bi.exception.BusinessException;
-import com.elec5619.bi.exception.ThrowUtils;
 import com.elec5619.bi.common.BaseResponse;
 import com.elec5619.bi.common.ErrorCode;
 import com.elec5619.bi.common.ResultUtils;
+import com.elec5619.bi.exception.BusinessException;
+import com.elec5619.bi.exception.ThrowUtils;
 import com.elec5619.bi.model.dto.post.PostQueryRequest;
 import com.elec5619.bi.model.dto.postfavour.PostFavourAddRequest;
 import com.elec5619.bi.model.dto.postfavour.PostFavourQueryRequest;
@@ -15,15 +15,14 @@ import com.elec5619.bi.model.vo.PostVO;
 import com.elec5619.bi.service.PostFavourService;
 import com.elec5619.bi.service.PostService;
 import com.elec5619.bi.service.UserService;
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * 帖子收藏接口
