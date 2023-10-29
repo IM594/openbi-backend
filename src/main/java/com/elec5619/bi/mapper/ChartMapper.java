@@ -11,6 +11,12 @@ import java.util.List;
 */
 @Repository
 public interface ChartMapper extends BaseMapper<Chart> {
+
+    /**
+     * 根据用户id获取图表
+     * @param userId
+     * @return
+     */
     List<Chart> getChartByUserId(long userId);
 }
 

@@ -163,7 +163,7 @@ public class PostController {
             HttpServletRequest request) {
         long current = postQueryRequest.getCurrent();
         long size = postQueryRequest.getPageSize();
-        // 限制爬虫
+        // pagesize不能大于20（限制爬虫）
         ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
         Page<Post> postPage = postService.page(new Page<>(current, size),
                 postService.getQueryWrapper(postQueryRequest));
@@ -187,7 +187,7 @@ public class PostController {
         postQueryRequest.setUserId(loginUser.getId());
         long current = postQueryRequest.getCurrent();
         long size = postQueryRequest.getPageSize();
-        // 限制爬虫
+        // pagesize不能大于20（限制爬虫）
         ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
         Page<Post> postPage = postService.page(new Page<>(current, size),
                 postService.getQueryWrapper(postQueryRequest));
@@ -195,28 +195,7 @@ public class PostController {
     }
 
     // endregion
-
-
-
-//    /**
-//     * 分页搜索帖子，不从es
-//     * @param postQueryRequest
-//     * @param request
-//     * @return
-//     */
-//    @PostMapping("/search/page/vo")
-//    public BaseResponse<Page<PostVO>> searchPostVOByPage(@RequestBody PostQueryRequest postQueryRequest,
-//                                                         HttpServletRequest request) {
-//        long current = postQueryRequest.getCurrent();
-//        long size = postQueryRequest.getPageSize();
-//        String keyword = postQueryRequest.getKeyword();
-//        // 限制爬虫
-//        ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
-//        Page<Post> postPage = postService.searchPostByPage(new Page<>(current, size),
-//                postService.getQueryWrapper(postQueryRequest), keyword);
-//        return ResultUtils.success(postService.getPostVOPage(postPage, request));
-//    }
-
+    
 
     /**
      * 编辑（用户）

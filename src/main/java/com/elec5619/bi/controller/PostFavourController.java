@@ -79,7 +79,7 @@ public class PostFavourController {
         User loginUser = userService.getLoginUser(request);
         long current = postQueryRequest.getCurrent();
         long size = postQueryRequest.getPageSize();
-        // 限制爬虫
+        // pagesize不能大于20（限制爬虫）
         ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
         Page<Post> postPage = postFavourService.listFavourPostByPage(new Page<>(current, size),
                 postService.getQueryWrapper(postQueryRequest), loginUser.getId());
@@ -101,7 +101,7 @@ public class PostFavourController {
         long current = postFavourQueryRequest.getCurrent();
         long size = postFavourQueryRequest.getPageSize();
         Long userId = postFavourQueryRequest.getUserId();
-        // 限制爬虫
+        // pagesize不能大于20（限制爬虫）
         ThrowUtils.throwIf(size > 20 || userId == null, ErrorCode.PARAMS_ERROR);
         Page<Post> postPage = postFavourService.listFavourPostByPage(new Page<>(current, size),
                 postService.getQueryWrapper(postFavourQueryRequest.getPostQueryRequest()), userId);
