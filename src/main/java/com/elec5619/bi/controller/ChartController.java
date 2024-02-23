@@ -347,14 +347,15 @@ public class ChartController {
 
         // 提取content部分的内容，这样才能拿到生成的代码和分析结论
         String content = getOpenAiResultContent(response);
+        System.out.println("Returns...: "+ content);
 
         // 提取生成的代码
         String chartCode = processOpenAiResultToCode(content).trim();
-        System.out.println(chartCode);
+        System.out.println("chartCode: "+ chartCode);
 
         //提取文字分析结果
         String analysisResult = processOpenAiResultToAnalysisResult(content).trim();
-        System.out.println(analysisResult);
+        System.out.println("analysisResult: " + analysisResult);
 
         //保存图表到数据库
         Chart chart = new Chart();
@@ -420,9 +421,9 @@ public class ChartController {
      */
     private String processOpenAiResultToCode(String content) {
         try {
-            int start = content.indexOf("【【【【【");
+//            int start = content.indexOf("【【【【【");
             int end = content.indexOf("】】】】】");
-            String code = content.substring(start + 5, end);
+            String code = content.substring(0, end);
 
             //如果code包含“option =”，则要提取"option ="后面的内容，一直到"};"
             if (code.contains("option =")) {

@@ -16,9 +16,12 @@ spring:
   # 数据库配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://openbi-elec5619-openbi.aivencloud.com:24356/bi
-    username: avnadmin
-    password: AVNS_RzaLxV8hMbvEkpAXNPJ
+#    url: jdbc:mysql://openbi-elec5619-openbi.aivencloud.com:24356/bi
+#    username: avnadmin
+#    password: AVNS_RzaLxV8hMbvEkpAXNPJ
+    url: jdbc:mysql://sh-cynosdbmysql-grp-hbk9mrdq.sql.tencentcdb.com:21953/bi
+    username: root
+    password: Luzhaohao123
   # 文件上传
   servlet:
     multipart:
@@ -44,4 +47,4 @@ mybatis-plus:
       logic-not-delete-value: 0 # 逻辑未删除值（默认为 0）
 # application.yml
 openai:
-  apiKey: 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
+  apiKey: sk-yoalE2qjWOm2kehJ17C4Bc8b761f40528aDd125dAf323878

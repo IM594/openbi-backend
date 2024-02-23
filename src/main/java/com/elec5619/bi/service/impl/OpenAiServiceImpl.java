@@ -28,7 +28,8 @@ public class OpenAiServiceImpl implements OpenAiService {
      */
     @Override
     public String generateContent(String apiKey, List<Map<String, Object>> messages) {
-        String url = "https://api.openai.com/v1/chat/completions";
+//        String url = "https://api.openai.com/v1/chat/completions";
+        String url = "https://api.dexiangit.com/v1/chat/completions";
 
         // 创建请求参数
         Map<String, Object> paramMap = createOpenAiRequest(messages);

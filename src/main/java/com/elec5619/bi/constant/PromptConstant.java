@@ -22,7 +22,7 @@ public interface PromptConstant {
      *
      * @Author Zhaohao Lu
      */
-    String SHARED_CODESPACE = "【【【【【\n" +
+    String SHARED_CODESPACE =
             "{front-end Echarts V5 option configuration object js code (must Wrap the attribute names and string values in double quotes in JSON data), ensuring reasonable and beautiful data visualization and no redundant content. Add tooltip for the chart so that I can switch it. Please make the charts look clear at a glance. And learn the official echarts example how to make a beautiful";
 
     /**
@@ -30,8 +30,8 @@ public interface PromptConstant {
      *
      * @Author Zhaohao Lu
      */
-    String SHARED_CONCLUSION = "】】】】】\n" +
-            "{Provide a clear and detailed conclusion of the data analysis, avoiding redundant comments}";
+    String SHARED_CONCLUSION = "】】】】】（必须使用这五个符号作为分隔）" +
+            "{Here, you must provide a clear and detailed conclusion of the data analysis, avoiding redundant comments}";
 
 
     /**
