@@ -5,9 +5,9 @@ spring:
   # 数据库配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://openbi-elec5619-openbi.aivencloud.com:24356/bi
-    username: avnadmin
-    password: AVNS_RzaLxV8hMbvEkpAXNPJ
+    url: jdbc:mysql://sh-cynosdbmysql-grp-hbk9mrdq.sql.tencentcdb.com:21953/bi
+    username: root
+    password: Luzhaohao123
 mybatis-plus:
   configuration:
     # 生产环境关闭日志
